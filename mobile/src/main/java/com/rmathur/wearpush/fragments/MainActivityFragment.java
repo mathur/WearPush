@@ -62,19 +62,7 @@ public class MainActivityFragment extends Fragment implements
         floatingMenu.setOnMenuButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                floatingMenu.toggle(true);
-            }
-        });
-
-        final FloatingActionButton mNewPushText = new com.github.clans.fab.FloatingActionButton(getActivity());
-        mNewPushText.setButtonSize(com.github.clans.fab.FloatingActionButton.SIZE_MINI);
-        mNewPushText.setLabelText(getString(R.string.new_push_text));
-        mNewPushText.setImageResource(android.R.drawable.ic_input_add);
-        mNewPushText.setImageTintList(ColorStateList.valueOf(Color.WHITE));
-        floatingMenu.addMenuButton(mNewPushText);
-        mNewPushText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                //floatingMenu.toggle(true);
                 new MaterialDialog.Builder(a)
                         .title("Enter Text")
                         .content("Enter the text you want to send to your Android device")
@@ -97,18 +85,49 @@ public class MainActivityFragment extends Fragment implements
             }
         });
 
-        final FloatingActionButton mNewPushImage = new com.github.clans.fab.FloatingActionButton(getActivity());
-        mNewPushImage.setButtonSize(com.github.clans.fab.FloatingActionButton.SIZE_MINI);
-        mNewPushImage.setLabelText(getString(R.string.new_push_image));
-        mNewPushImage.setImageResource(android.R.drawable.ic_input_add);
-        mNewPushImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
-        floatingMenu.addMenuButton(mNewPushImage);
-        mNewPushImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // nothing
-            }
-        });
+//        final FloatingActionButton mNewPushText = new com.github.clans.fab.FloatingActionButton(getActivity());
+//        mNewPushText.setButtonSize(com.github.clans.fab.FloatingActionButton.SIZE_MINI);
+//        mNewPushText.setLabelText(getString(R.string.new_push_text));
+//        mNewPushText.setImageResource(android.R.drawable.ic_input_add);
+//        mNewPushText.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+//        floatingMenu.addMenuButton(mNewPushText);
+//        mNewPushText.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                new MaterialDialog.Builder(a)
+//                        .title("Enter Text")
+//                        .content("Enter the text you want to send to your Android device")
+//                        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+//                        .input(null, null, new MaterialDialog.InputCallback() {
+//                            @Override
+//                            public void onInput(MaterialDialog dialog, CharSequence input) {
+//                                sendMessage(WEAR_MESSAGE_PATH, input.toString());
+//                                Push push = new Push(input.toString(), new Date());
+//                                push.save();
+//                                pushes.clear();
+//                                pushes = Push.listAll(Push.class);
+//                                Collections.sort(pushes);
+//                                adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
+//                                historyList.setAdapter(adapter);
+//                                dialog.dismiss();
+//                                floatingMenu.toggle(true);
+//                            }
+//                        }).show();
+//            }
+//        });
+
+//        final FloatingActionButton mNewPushImage = new com.github.clans.fab.FloatingActionButton(getActivity());
+//        mNewPushImage.setButtonSize(com.github.clans.fab.FloatingActionButton.SIZE_MINI);
+//        mNewPushImage.setLabelText(getString(R.string.new_push_image));
+//        mNewPushImage.setImageResource(android.R.drawable.ic_input_add);
+//        mNewPushImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+//        floatingMenu.addMenuButton(mNewPushImage);
+//        mNewPushImage.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // nothing
+//            }
+//        });
 
         historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -139,6 +158,37 @@ public class MainActivityFragment extends Fragment implements
                             }
                         })
                         .show();
+            }
+        });
+
+        historyList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final Push push = pushes.get(position);
+                new MaterialDialog.Builder(a)
+                        .title("Delete Push?")
+                        .positiveText("Yes")
+                        .negativeText("No")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                push.delete();
+                                pushes.clear();
+                                pushes = Push.listAll(Push.class);
+                                Collections.sort(pushes);
+                                adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
+                                historyList.setAdapter(adapter);
+                                dialog.dismiss();
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+                return true;
             }
         });
 
@@ -189,7 +239,9 @@ public class MainActivityFragment extends Fragment implements
     public void onConnectionSuspended(int cause) { }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) { }
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e(TAG, connectionResult.toString());
+    }
 
     public class SendToDataLayerThread extends Thread {
         String path;
@@ -206,11 +258,11 @@ public class MainActivityFragment extends Fragment implements
             for (Node node : nodes.getNodes()) {
                 MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleClient, node.getId(), path, message.getBytes()).await();
                 if (result.getStatus().isSuccess()) {
-                    Log.v("myTag", "Message: {" + message + "} sent to: " + node.getDisplayName());
+                    Log.v(TAG, "Message: {" + message + "} sent to: " + node.getDisplayName());
                 }
                 else {
                     // Log an error
-                    Log.v("myTag", "ERROR: failed to send Message");
+                    Log.v(TAG, "ERROR: failed to send Message");
                 }
             }
             a.runOnUiThread(new Runnable() {
