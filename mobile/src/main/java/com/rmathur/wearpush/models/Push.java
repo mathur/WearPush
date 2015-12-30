@@ -5,7 +5,7 @@ import com.orm.SugarRecord;
 import java.io.File;
 import java.util.Date;
 
-public class Push extends SugarRecord {
+public class Push extends SugarRecord implements Comparable<Push> {
 
     String title;
     Date date;
@@ -37,5 +37,11 @@ public class Push extends SugarRecord {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    @Override
+    public int compareTo(Push another) {
+        // reverse ordering
+        return -1 * this.getDate().compareTo(another.getDate());
     }
 }

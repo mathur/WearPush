@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.clans.fab.FloatingActionButton;
@@ -21,8 +22,10 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.rmathur.wearpush.R;
+import com.rmathur.wearpush.adapters.HistoryAdapter;
 import com.rmathur.wearpush.models.Push;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +39,7 @@ public class MainActivityFragment extends Fragment implements
     String TAG = MainActivityFragment.class.getSimpleName();
 
     Activity a;
+    private HistoryAdapter adapter;
 
     GoogleApiClient googleClient;
     private final String WEAR_MESSAGE_PATH = "/message_path";
@@ -47,6 +51,8 @@ public class MainActivityFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
+
+        final ListView historyList = (ListView) v.findViewById(R.id.lstHistory);
         a = this.getActivity();
 
         final FloatingActionMenu floatingMenu = (FloatingActionMenu) v.findViewById(R.id.newPush);
@@ -77,6 +83,9 @@ public class MainActivityFragment extends Fragment implements
                                 sendMessage(WEAR_MESSAGE_PATH, input.toString());
                                 Push push = new Push(input.toString(), new Date());
                                 push.save();
+                                Log.e("saved", input.toString());
+                                adapter.notifyDataSetChanged();
+                                historyList.setAdapter(adapter);
                                 dialog.dismiss();
                             }
                         }).show();
@@ -104,7 +113,12 @@ public class MainActivityFragment extends Fragment implements
                 .build();
 
         List<Push> pushes = Push.listAll(Push.class);
-        
+        Collections.sort(pushes);
+        for(Push push : pushes) {
+            Log.e("oh", push.getTitle());
+        }
+        adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
+        historyList.setAdapter(adapter);
 
         return v;
     }
