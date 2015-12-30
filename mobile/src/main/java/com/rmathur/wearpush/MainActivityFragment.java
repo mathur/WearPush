@@ -1,13 +1,17 @@
 package com.rmathur.wearpush;
 
 import android.app.Activity;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.common.ConnectionResult;
@@ -53,11 +57,22 @@ public class MainActivityFragment extends Fragment implements
         mNewPushText.setButtonSize(com.github.clans.fab.FloatingActionButton.SIZE_MINI);
         mNewPushText.setLabelText(getString(R.string.new_push_text));
         mNewPushText.setImageResource(android.R.drawable.ic_input_add);
+        mNewPushText.setImageTintList(ColorStateList.valueOf(Color.WHITE));
         floatingMenu.addMenuButton(mNewPushText);
         mNewPushText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(WEAR_MESSAGE_PATH, "hi");
+                new MaterialDialog.Builder(a)
+                        .title("Enter Text")
+                        .content("Enter the text you want to send to your Android device")
+                        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+                        .input(null, null, new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(MaterialDialog dialog, CharSequence input) {
+                                sendMessage(WEAR_MESSAGE_PATH, input.toString());
+                                dialog.dismiss();
+                            }
+                        }).show();
             }
         });
 
@@ -65,6 +80,7 @@ public class MainActivityFragment extends Fragment implements
         mNewPushImage.setButtonSize(com.github.clans.fab.FloatingActionButton.SIZE_MINI);
         mNewPushImage.setLabelText(getString(R.string.new_push_image));
         mNewPushImage.setImageResource(android.R.drawable.ic_input_add);
+        mNewPushImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
         floatingMenu.addMenuButton(mNewPushImage);
         mNewPushImage.setOnClickListener(new View.OnClickListener() {
             @Override
