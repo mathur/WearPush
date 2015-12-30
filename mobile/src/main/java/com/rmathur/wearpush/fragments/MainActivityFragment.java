@@ -56,40 +56,6 @@ public class MainActivityFragment extends Fragment implements
 
         a = this.getActivity();
         final ListView historyList = (ListView) v.findViewById(R.id.lstHistory);
-        historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final Push push = pushes.get(position);
-                new MaterialDialog.Builder(a)
-                        .title("Push again?")
-                        .positiveText("Yes")
-                        .negativeText("No")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                sendMessage(WEAR_MESSAGE_PATH, push.getTitle().toString());
-                                Push repeatPush = new Push(push.getTitle().toString(), new Date());
-                                repeatPush.save();
-                                pushes = Push.listAll(Push.class);
-                                Collections.sort(pushes);
-                                adapter.notifyDataSetChanged();
-                                dialog.dismiss();
-                            }
-                        })
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-            }
-        });
-
-        pushes = Push.listAll(Push.class);
-        Collections.sort(pushes);
-        adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
-        historyList.setAdapter(adapter);
 
         final FloatingActionMenu floatingMenu = (FloatingActionMenu) v.findViewById(R.id.newPush);
         floatingMenu.setClosedOnTouchOutside(true);
@@ -119,10 +85,13 @@ public class MainActivityFragment extends Fragment implements
                                 sendMessage(WEAR_MESSAGE_PATH, input.toString());
                                 Push push = new Push(input.toString(), new Date());
                                 push.save();
+                                pushes.clear();
                                 pushes = Push.listAll(Push.class);
                                 Collections.sort(pushes);
-                                adapter.notifyDataSetChanged();
+                                adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
+                                historyList.setAdapter(adapter);
                                 dialog.dismiss();
+                                floatingMenu.toggle(true);
                             }
                         }).show();
             }
@@ -140,6 +109,43 @@ public class MainActivityFragment extends Fragment implements
                 // nothing
             }
         });
+
+        historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final Push push = pushes.get(position);
+                new MaterialDialog.Builder(a)
+                        .title("Push again?")
+                        .positiveText("Yes")
+                        .negativeText("No")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                sendMessage(WEAR_MESSAGE_PATH, push.getTitle().toString());
+                                Push repeatPush = new Push(push.getTitle().toString(), new Date());
+                                repeatPush.save();
+                                pushes.clear();
+                                pushes = Push.listAll(Push.class);
+                                Collections.sort(pushes);
+                                adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
+                                historyList.setAdapter(adapter);
+                                dialog.dismiss();
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        pushes = Push.listAll(Push.class);
+        Collections.sort(pushes);
+        adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
+        historyList.setAdapter(adapter);
 
         // Build a new GoogleApiClient for the Wearable API
         googleClient = new GoogleApiClient.Builder(a)
