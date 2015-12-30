@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">WearPush</string>
     <string name="action_settings">Settings</string>
+
+    <string name="new_push_text">Push New Text</string>
+    <string name="new_push_image">Push New Image</string>
 </resources>
