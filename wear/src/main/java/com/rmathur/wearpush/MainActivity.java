@@ -23,9 +23,7 @@ public class MainActivity extends WearableActivity {
         IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
-
         setAmbientEnabled();
-
         mTextView = (TextView) findViewById(R.id.text);
     }
 

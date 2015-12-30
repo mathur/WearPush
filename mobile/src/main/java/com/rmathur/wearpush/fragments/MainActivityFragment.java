@@ -1,4 +1,4 @@
-package com.rmathur.wearpush;
+package com.rmathur.wearpush.fragments;
 
 import android.app.Activity;
 import android.content.res.ColorStateList;
@@ -20,6 +20,11 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.rmathur.wearpush.R;
+import com.rmathur.wearpush.models.Push;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -70,6 +75,8 @@ public class MainActivityFragment extends Fragment implements
                             @Override
                             public void onInput(MaterialDialog dialog, CharSequence input) {
                                 sendMessage(WEAR_MESSAGE_PATH, input.toString());
+                                Push push = new Push(input.toString(), new Date());
+                                push.save();
                                 dialog.dismiss();
                             }
                         }).show();
@@ -95,6 +102,9 @@ public class MainActivityFragment extends Fragment implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+
+        List<Push> pushes = Push.listAll(Push.class);
+        
 
         return v;
     }
