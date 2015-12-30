@@ -3,6 +3,7 @@ package com.rmathur.wearpush.fragments;
 import android.app.Activity;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.InputType;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -30,9 +32,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class MainActivityFragment extends Fragment implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -60,7 +59,30 @@ public class MainActivityFragment extends Fragment implements
         historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                final Push push = pushes.get(position);
+                new MaterialDialog.Builder(a)
+                        .title("Push again?")
+                        .positiveText("Yes")
+                        .negativeText("No")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                sendMessage(WEAR_MESSAGE_PATH, push.getTitle().toString());
+                                Push repeatPush = new Push(push.getTitle().toString(), new Date());
+                                repeatPush.save();
+                                pushes = Push.listAll(Push.class);
+                                Collections.sort(pushes);
+                                adapter.notifyDataSetChanged();
+                                dialog.dismiss();
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
             }
         });
 
@@ -98,6 +120,7 @@ public class MainActivityFragment extends Fragment implements
                                 Push push = new Push(input.toString(), new Date());
                                 push.save();
                                 pushes = Push.listAll(Push.class);
+                                Collections.sort(pushes);
                                 adapter.notifyDataSetChanged();
                                 dialog.dismiss();
                             }
