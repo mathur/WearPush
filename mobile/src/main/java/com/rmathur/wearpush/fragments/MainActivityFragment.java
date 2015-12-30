@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -44,6 +45,8 @@ public class MainActivityFragment extends Fragment implements
     GoogleApiClient googleClient;
     private final String WEAR_MESSAGE_PATH = "/message_path";
 
+    List<Push> pushes;
+
     public MainActivityFragment() {
     }
 
@@ -52,8 +55,19 @@ public class MainActivityFragment extends Fragment implements
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
 
-        final ListView historyList = (ListView) v.findViewById(R.id.lstHistory);
         a = this.getActivity();
+        final ListView historyList = (ListView) v.findViewById(R.id.lstHistory);
+        historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
+
+        pushes = Push.listAll(Push.class);
+        Collections.sort(pushes);
+        adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
+        historyList.setAdapter(adapter);
 
         final FloatingActionMenu floatingMenu = (FloatingActionMenu) v.findViewById(R.id.newPush);
         floatingMenu.setClosedOnTouchOutside(true);
@@ -83,9 +97,8 @@ public class MainActivityFragment extends Fragment implements
                                 sendMessage(WEAR_MESSAGE_PATH, input.toString());
                                 Push push = new Push(input.toString(), new Date());
                                 push.save();
-                                Log.e("saved", input.toString());
+                                pushes = Push.listAll(Push.class);
                                 adapter.notifyDataSetChanged();
-                                historyList.setAdapter(adapter);
                                 dialog.dismiss();
                             }
                         }).show();
@@ -111,14 +124,6 @@ public class MainActivityFragment extends Fragment implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
-        List<Push> pushes = Push.listAll(Push.class);
-        Collections.sort(pushes);
-        for(Push push : pushes) {
-            Log.e("oh", push.getTitle());
-        }
-        adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
-        historyList.setAdapter(adapter);
 
         return v;
     }
