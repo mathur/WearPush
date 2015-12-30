@@ -5,6 +5,7 @@
                                               android:layout_height="match_parent">
 
     <RelativeLayout
+        android:id="@+id/background_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_box="all">
@@ -15,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:text="Send msg from phone"/>
+            android:text="Waiting for push..."/>
     </RelativeLayout>
 
 </android.support.wearable.view.BoxInsetLayout>
