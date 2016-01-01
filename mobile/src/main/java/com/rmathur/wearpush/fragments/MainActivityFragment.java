@@ -79,7 +79,7 @@ public class MainActivityFragment extends Fragment implements
                                 adapter = new HistoryAdapter(getActivity(), R.layout.item_history, pushes);
                                 historyList.setAdapter(adapter);
                                 dialog.dismiss();
-                                floatingMenu.toggle(true);
+                                //floatingMenu.toggle(true);
                             }
                         }).show();
             }
