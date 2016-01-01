@@ -1,6 +1,7 @@
 package com.rmathur.wearpush;
 
 import android.content.Intent;
+import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -21,10 +22,16 @@ public class ListenerService extends WearableListenerService {
             messageIntent.setAction(Intent.ACTION_SEND);
             messageIntent.putExtra("message", message);
             LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
+            vibrate();
         }
         else {
             super.onMessageReceived(messageEvent);
         }
 
+    }
+
+    public void vibrate() {
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vibrator.vibrate(500);
     }
 }
